@@ -1,0 +1,17 @@
+body {
+    background-color: rgb(181, 97, 80);
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+}
+
+.my-contain {
+    background-color: rgb(225, 135, 117);
+    padding: 14px;
+    max-width: 600px;
+    max-height: fit-content;
+    border-radius: 12px;
+    top: 10%;
+    position: relative;
+    font-size: large;
+}
