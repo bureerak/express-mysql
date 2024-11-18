@@ -8,7 +8,7 @@ dotenv.config( { path:'./.env' } )
 
 const app = express();
 const publicDirectory = path.join(__dirname,'./public');
-app.use(express.static(publicDirectory)); // set ตำแหน่งไฟล์ acces ต่างๆ
+app.use(express.static(publicDirectory)); // set ตำแหน่งไฟล์ acces(css) ต่างๆ
 app.set('view engine', 'hbs'); // ใช้ hbs เป็น view engine
 
 app.use(cookieSession({

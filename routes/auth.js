@@ -16,7 +16,7 @@ router.post("/login", ifLoggedIn,[
         return db.promise().execute("SELECT * FROM users WHERE username = ?", [value])
         .then(([row]) => {
             if (row.length === 1) { return true }
-            return Promise.reject('Invalid Username :[')
+            return Promise.reject('Invalid Username')
         })
     }),
     check('password', 'Password is empty').trim().not().isEmpty(),

@@ -28,6 +28,13 @@ router.get('/logout',(req,res) => {
     res.redirect('/')
 })
 
+router.get('/data', ifNotLoggedIn, (req,res) => {
+    db.query('SELECT max_up,max_tod,max_down,run_up,run_down FROM users WHERE id = ?', [req.session.userID], (err,result) => {
+        if (err) throw err;
+        res.send(result)
+    })
+})
+
 router.post('/reset', ifNotLoggedIn,[
     check('new_password', 'กรุณากรอกรหัสผ่านในช่องว่าง').trim().not().isEmpty(),
     check('new_password', 'รหัสผ่านต้องมี 6 ตัวขึ้นไป').isLength({min:6})

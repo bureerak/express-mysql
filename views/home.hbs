@@ -6,26 +6,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <title>Home</title>
     <style>
         body {
             background-color: rgb(176, 191, 191);
         }
+
+        th {
+            min-width: 70px;
+            text-align: center;
+        }
+
+        th .limitInput {
+            max-width: 70px;
+            text-align: center;
+        }
+
+        /* Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
     </style>
 </head>
 
 <body>
-    <div class="container-fluid p-5 bg-primary text-white text-center" >
+    <div class="container-fluid p-5 bg-primary text-white text-center">
         <h1>Welcome to Homepage, {{name}}</h1>
         <p>กรุณาเปลี่ยนรหัสผ่านครั้งแรกทุกครั้ง</p>
     </div>
 
     {{#if message}}
     <div class="container">
-    <div class="alert alert-warning alert-dismissible fade show mt-4">
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        <strong>{{message}}</strong>
-    </div>
+        <div class="alert alert-warning alert-dismissible fade show mt-4">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <strong>{{message}}</strong>
+        </div>
     </div>
     {{/if}}
 
@@ -37,8 +61,7 @@
                 <button type="button" class="btn btn-warning" data-bs-toggle="collapse"
                     data-bs-target="#change-password">เปลี่ยนรหัสผ่าน</button>
                 <div id="change-password" class="collapse">
-
-                    <form action="/reset" method="POST">
+                    <form action="/reset" method="POST" autocomplete="off">
                         <div class="form-floating mb-3 mt-3">
                             <input type="password" class="form-control" id="old-password"
                                 placeholder="Enter old Password" name="old_password">
@@ -51,8 +74,42 @@
                         </div>
                         <button type="submit" class="btn btn-success">ยืนยัน</button>
                     </form>
-
                 </div>
+                <form>
+                    <div class="card-body" style="overflow-y: auto;">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>หมายเลข</th>
+                                    <th>บน <p style="display: inline;" id="Crd">(Max)</p>
+                                    </th>
+                                    <th>โต๊ด <p style="display: inline;" id="Crd">(Max)</p>
+                                    </th>
+                                    <th>ล่าง <p style="display: inline;" id="Crd">(Max)</p>
+                                    </th>
+                                    <th>วิ่งบน <p style="display: inline;" id="Crd">(Max)</p>
+                                    </th>
+                                    <th>วิ่งล่าง <p style="display: inline;" id="Crd">(Max)</p>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id="inputInfo">
+                                    <th><button type="submit" class="btn btn-success"
+                                            style="color: white; border-radius: 80px;"><ion-icon name="add-outline"
+                                                style="margin-top: 5px;"></ion-icon></button></th>
+                                    <th><input name="number" id="defInput" class="limitInput" type="text" maxlength="3"></th>
+                                    <th><input name="up" type="number" class="limitInput cdInput" disabled></th>
+                                    <th><input name="tod" type="number" class="limitInput cdInput" disabled></th>
+                                    <th><input name="down" type="number" class="limitInput cdInput" disabled></th>
+                                    <th><input name="runUp" type="number" class="limitInput cdInput" disabled></th>
+                                    <th><input name="runDown" type="number" class="limitInput cdInput" disabled></th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
             </div>
             <a href="/logout" class="btn btn-danger">Logout</a>
         </div>
@@ -60,6 +117,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
+    <script src="/input_script.js"></script>
 </body>
 
 </html>
