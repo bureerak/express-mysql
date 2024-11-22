@@ -35,10 +35,40 @@
         input[type=number] {
             -moz-appearance: textfield;
         }
+
+        #FormSubmit {
+            position: sticky;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
     </style>
+    <script>
+        /* Toast_Alert */
+        function toastA(msg, type) {
+            const toastAlert = document.getElementById('toastAlert');
+            toastAlert.classList = `toast border-0 text-bg-${type}`
+            const msgToast = document.getElementById('msgToast');
+            msgToast.innerHTML = `${msg}`
+            const toast = new bootstrap.Toast(toastAlert);
+            toast.show()
+            return 'Alert!'
+        }
+    </script>
 </head>
 
 <body>
+    <div class="toast-container top-5 start-0 p-4">
+        <div class="toast border-0" id="toastAlert">
+            <div class="d-flex">
+                <div class="toast-body" id="msgToast">
+                    /* placeholder */
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
     <div class="container-fluid p-5 bg-primary text-white text-center">
         <h1>Welcome to Homepage, {{name}}</h1>
         <p>กรุณาเปลี่ยนรหัสผ่านครั้งแรกทุกครั้ง</p>
@@ -75,49 +105,162 @@
                         <button type="submit" class="btn btn-success">ยืนยัน</button>
                     </form>
                 </div>
-                <form>
-                    <div class="card-body" style="overflow-y: auto;">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>หมายเลข</th>
-                                    <th>บน <p style="display: inline;" id="Crd">(Max)</p>
-                                    </th>
-                                    <th>โต๊ด <p style="display: inline;" id="Crd">(Max)</p>
-                                    </th>
-                                    <th>ล่าง <p style="display: inline;" id="Crd">(Max)</p>
-                                    </th>
-                                    <th>วิ่งบน <p style="display: inline;" id="Crd">(Max)</p>
-                                    </th>
-                                    <th>วิ่งล่าง <p style="display: inline;" id="Crd">(Max)</p>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr id="inputInfo">
-                                    <th><button type="submit" class="btn btn-success"
-                                            style="color: white; border-radius: 80px;"><ion-icon name="add-outline"
-                                                style="margin-top: 5px;"></ion-icon></button></th>
-                                    <th><input name="number" id="defInput" class="limitInput" type="text" maxlength="3"></th>
-                                    <th><input name="up" type="number" class="limitInput cdInput" disabled></th>
-                                    <th><input name="tod" type="number" class="limitInput cdInput" disabled></th>
-                                    <th><input name="down" type="number" class="limitInput cdInput" disabled></th>
-                                    <th><input name="runUp" type="number" class="limitInput cdInput" disabled></th>
-                                    <th><input name="runDown" type="number" class="limitInput cdInput" disabled></th>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </form>
+                <div class="card-body" style="overflow-y: auto;">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>หมายเลข</th>
+                                <th>บน <p style="display: inline;" id="Crd">(Max)</p>
+                                </th>
+                                <th>โต๊ด <p style="display: inline;" id="Crd">(Max)</p>
+                                </th>
+                                <th>ล่าง <p style="display: inline;" id="Crd">(Max)</p>
+                                </th>
+                                <th>วิ่งบน <p style="display: inline;" id="Crd">(Max)</p>
+                                </th>
+                                <th>วิ่งล่าง <p style="display: inline;" id="Crd">(Max)</p>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="FormInput">
+                            <tr>
+                                <th><input autocomplete="false" name="number" class="limitInput defInput" type="text"
+                                        maxlength="3"></th>
+                                <th><input min="0" name="up" type="number" class="limitInput cdInput-0" disabled>
+                                </th>
+                                <th><input min="0" name="tod" type="number" class="limitInput cdInput-0" disabled>
+                                </th>
+                                <th><input min="0" name="down" type="number" class="limitInput cdInput-0" disabled>
+                                </th>
+                                <th><input min="0" name="r_up" type="number" class="limitInput cdInput-0" disabled>
+                                </th>
+                                <th><input min="0" name="r_down" type="number" class="limitInput cdInput-0" disabled>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th><input autocomplete="false" name="number" class="limitInput defInput" type="text"
+                                        maxlength="3"></th>
+                                <th><input min="0" name="up" type="number" class="limitInput cdInput-1" disabled>
+                                </th>
+                                <th><input min="0" name="tod" type="number" class="limitInput cdInput-1" disabled>
+                                </th>
+                                <th><input min="0" name="down" type="number" class="limitInput cdInput-1" disabled>
+                                </th>
+                                <th><input min="0" name="r_up" type="number" class="limitInput cdInput-1" disabled>
+                                </th>
+                                <th><input min="0" name="r_down" type="number" class="limitInput cdInput-1" disabled>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th><input autocomplete="false" name="number" class="limitInput defInput" type="text"
+                                        maxlength="3"></th>
+                                <th><input min="0" name="up" type="number" class="limitInput cdInput-2" disabled>
+                                </th>
+                                <th><input min="0" name="tod" type="number" class="limitInput cdInput-2" disabled>
+                                </th>
+                                <th><input min="0" name="down" type="number" class="limitInput cdInput-2" disabled>
+                                </th>
+                                <th><input min="0" name="r_up" type="number" class="limitInput cdInput-2" disabled>
+                                </th>
+                                <th><input min="0" name="r_down" type="number" class="limitInput cdInput-2" disabled>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th><input autocomplete="false" name="number" class="limitInput defInput" type="text"
+                                        maxlength="3"></th>
+                                <th><input min="0" name="up" type="number" class="limitInput cdInput-3" disabled>
+                                </th>
+                                <th><input min="0" name="tod" type="number" class="limitInput cdInput-3" disabled>
+                                </th>
+                                <th><input min="0" name="down" type="number" class="limitInput cdInput-3" disabled>
+                                </th>
+                                <th><input min="0" name="r_up" type="number" class="limitInput cdInput-3" disabled>
+                                </th>
+                                <th><input min="0" name="r_down" type="number" class="limitInput cdInput-3" disabled>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th><input autocomplete="false" name="number" class="limitInput defInput" type="text"
+                                        maxlength="3"></th>
+                                <th><input min="0" name="up" type="number" class="limitInput cdInput-4" disabled>
+                                </th>
+                                <th><input min="0" name="tod" type="number" class="limitInput cdInput-4" disabled>
+                                </th>
+                                <th><input min="0" name="down" type="number" class="limitInput cdInput-4" disabled>
+                                </th>
+                                <th><input min="0" name="r_up" type="number" class="limitInput cdInput-4" disabled>
+                                </th>
+                                <th><input min="0" name="r_down" type="number" class="limitInput cdInput-4" disabled>
+                                </th>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button id="FormSubmit" type="submit" class="btn btn-success my-2">ยืนยันการแทง</button>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>หมายเลข</th>
+                                <th>บน</th>
+                                <th>โต๊ด</th>
+                                <th>ล่าง</th>
+                                <th>วิ่งบน</th>
+                                <th>วิ่งล่าง</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataReload">
+                            {{!-- placeholder --}}
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <a href="/logout" class="btn btn-danger">Logout</a>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
     <script src="/input_script.js"></script>
+
+    <script>
+        document.getElementById('FormSubmit').addEventListener('click', (e) => {
+            const dataSet = document.querySelectorAll('#FormInput tr')
+            const UseData = [];
+            dataSet.forEach((tr) => {
+                const inputs = tr.querySelectorAll('input');
+                const data = {}
+                let counter = 0
+                inputs.forEach((input) => {
+                    const name = input.name;
+                    const value = input.value.trim();
+                    if (value) {
+                        data[`ID${counter}`] = value;
+                        counter++;
+                    };
+                    input.value = ""
+                })
+                if (Object.keys(data).length > 0) {
+                    UseData.push(data)
+                }
+            })
+            data_add(UseData);
+        })
+
+        function data_add(formData) {
+            const req = new XMLHttpRequest();
+            req.open('POST', '/add');
+            req.setRequestHeader('Content-Type', 'application/json');
+            req.onload = () => {
+                const result = JSON.parse(req.responseText);
+                load_data();
+                console.log(result);
+            }
+            req.send(JSON.stringify(formData))
+        }
+
+    </script>
+
 </body>
 
 </html>
