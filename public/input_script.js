@@ -26,7 +26,7 @@ userInputs.forEach((input, Inputindex)=>{
 
 })
 
-//parse and update
+//parse and update (item.UserID)
 load_data()
 function load_data() {
     const req = new XMLHttpRequest();
@@ -38,15 +38,15 @@ function load_data() {
         update_HTML(result[0])
         result[1].forEach((item) => {
             const row = document.createElement("tr");
-            row.id = item.UserID
+            row.id = `trIndex${item.OrderID}`
             row.innerHTML = `
-            <th><button type="button" class="btn btn-danger">ยกเลิก</button></th>
-            <th>${item.num}</th>
-            <th>${item.top == null ? "-" : item.top}</th>
-            <th>${item.tod == null ? "-" : item.tod}</th>
-            <th>${item.down == null ? "-" : item.down}</th>
-            <th>${item.r_up == null ? "-" : item.r_up}</th>
-            <th>${item.r_down == null ? "-" : item.r_down}</th>`
+            <th><button type="button" class="btn btn-danger delete_btn" onclick="DeleteBT(trIndex${item.OrderID})">ยกเลิก</button></th>
+            <th type="${item.num.length}">${item.num}</th>
+            <th info="${item.top == null ? "-" : "enable"}" >${item.top == null ? "-" : item.top}</th>
+            <th info="${item.tod == null ? "-" : "enable"}" >${item.tod == null ? "-" : item.tod}</th>
+            <th info="${item.down == null ? "-" : "enable"}" >${item.down == null ? "-" : item.down}</th>
+            <th info="${item.r_up == null ? "-" : "enable"}" >${item.r_up == null ? "-" : item.r_up}</th>
+            <th info="${item.r_down == null ? "-" : "enable"}" >${item.r_down == null ? "-" : item.r_down}</th>`
             dataScope.appendChild(row);
         })
     }
@@ -59,4 +59,17 @@ function update_HTML(data) {
     maxCredit[2].innerHTML = `(${data.max_down})`
     maxCredit[3].innerHTML = `(${data.run_up})`
     maxCredit[4].innerHTML = `(${data.run_down})`
+}
+
+// Delete button
+function DeleteBT(id) {
+    const tr = id.querySelectorAll('th[info="enable"]');
+    const orderID = id.id.slice(7);
+    fetch(`/delete/${orderID}`)
+    .then(res => res.json())
+    .then(data => {
+        load_data();
+        console.log(data)
+    })
+    .catch(err => console.log(err))
 }

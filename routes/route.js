@@ -171,4 +171,19 @@ router.post('/add', async (req, res) => {
     res.send(textContent);
 });
 
+// DELETE
+router.get('/delete/(:id)', (req,res) => {
+    const orderID = req.params.id;
+    db.query('SELECT * FROM orders WHERE OrderID = ?',[orderID], (err,[result])=>{
+        if (err) throw err
+        if (result.UserID === req.session.userID) {
+            db.query('DELETE FROM orders WHERE OrderID = ?', [result.OrderID], (er ,pass) => {
+                if (er) throw er
+                res.json({msg:"ลบรายการเสร็จสิ้น"})
+            })
+        } else {
+            res.json({msg:"บางอย่างผิดพลาด"})
+        }
+    })
+})
 module.exports = router; //export router ออกไปใช้
