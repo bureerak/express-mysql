@@ -69,7 +69,11 @@ function DeleteBT(id) {
     .then(res => res.json())
     .then(data => {
         load_data();
-        console.log(data)
+        if (data.type === 'success'){
+            toastA('ดำเนินการเสร็จสิ้น' ,'success')
+        } else {
+            toastA('ทำรายการไม่สำเร็จ' ,'danger')
+        }
     })
     .catch(err => console.log(err))
 }

@@ -42,6 +42,36 @@
             transform: translateX(-50%);
             z-index: 1000;
         }
+
+        .modalContainer {
+            position: fixed;
+            background-color: rgba(0, 0, 0, 0.5);
+            height: 100%;
+            width: 100%;
+            z-index: 999999;
+            display: none;
+        }
+        .modalContainer.show {
+            display: block;
+            opacity: 1;
+            animation-name: show;
+            animation-duration: 0.3s;
+        }
+        .modalContainer .card {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            max-width: calc(100% - 4vh);
+            text-align: center;
+        }
+        @keyframes fadeOut {
+            0%{opacity: 1;}
+            100%{opacity: 0;}
+        }
+        @keyframes fadeIn {
+            0%{opacity: 0;}
+            100%{opacity: 1;}
+        }
     </style>
     <script>
         /* Toast_Alert */
@@ -54,17 +84,43 @@
             toast.show()
             return 'Alert!'
         }
+
+        function showModal(){
+            const modal = document.getElementById("modalContainer");
+            const clostBtn = document.getElementById("closeModal");
+            modal.style.animationName = "fadeIn";
+            modal.classList.add('show');
+            clostBtn.addEventListener('click', ()=>{
+                modal.style.animationName = "fadeOut"
+                setTimeout(() => {
+                modal.classList.remove('show');
+                }, 250)
+            }, { once: true } );
+        }
     </script>
 </head>
 
 <body>
-    <div class="toast-container top-5 start-0 p-4">
+    <div class="toast-container top-5 start-0 p-4" style="position: fixed;">
         <div class="toast border-0" id="toastAlert">
             <div class="d-flex">
                 <div class="toast-body" id="msgToast">
                     /* placeholder */
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalContainer" class="modalContainer">
+        <div class="card">
+            <div class="card-header">
+                ผลลัพธ์การดำเนินการ
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Special title treatment</h5>
+                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                <button id="closeModal" class="btn btn-danger"><strong>ปิด</strong></button>
             </div>
         </div>
     </div>
@@ -234,13 +290,14 @@
                 inputs.forEach((input) => {
                     const name = input.name;
                     const value = input.value.trim();
-                    if (value) {
+                    if (!input.disabled) {
                         data[`ID${counter}`] = value;
                         counter++;
                     };
                     input.value = ""
                 })
-                if (Object.keys(data).length > 0) {
+                if (Object.keys(data).length > 0 && data.ID0) {
+                    console.log(data)
                     UseData.push(data)
                 }
             })
@@ -254,7 +311,7 @@
             req.onload = () => {
                 const result = JSON.parse(req.responseText);
                 load_data();
-                console.log(result);
+                console.log(result); // แสดงข้อมูลผลลัพธ์
             }
             req.send(JSON.stringify(formData))
         }

@@ -78,25 +78,27 @@ router.post('/reset', ifNotLoggedIn, [
     }
 })
 
-router.post('/add', async (req, res) => {
+router.post('/add', ifNotLoggedIn, async (req, res) => {
     const test = (input) => { return /^\d+$/.test(input) }
     const dataSet = req.body;
     const textContent = [];
 
     for (let data of dataSet) {
         const name = data.ID0;
-        const fstInfo = data.ID1;
-        const secInfo = data.ID2;
+        let fstInfo = data.ID1;
+        let secInfo = data.ID2;
 
         const testResult = test(name);
         if (!testResult) {
             textContent.push({ type: 'danger', msg: `${name} กรุณากรอกเฉพาะตัวเลข` });
             continue;
         }
-        if (!fstInfo || !secInfo) {
+        if (!fstInfo && !secInfo) {
             textContent.push({ type: 'danger', msg: `${name} กรุณากรอกให้ครบ` });
             continue;
         }
+        fstInfo = fstInfo ? fstInfo : 0;
+        secInfo = secInfo ? secInfo : 0;
 
         const mapping = {
             3: { q_arg1: 'max_up', q_arg2: 'max_tod', i_arg1: 'top', i_arg2: 'tod' },
@@ -148,12 +150,17 @@ router.post('/add', async (req, res) => {
             let sec_sum = sum_2[0].sec_sum
             fst_sum = fst_sum ? fst_sum : 0
             sec_sum = sec_sum ? sec_sum : 0
-            if (
-                parseInt(fstInfo) + parseInt(fst_sum) <= result[0][q_arg1] &&
-                parseInt(secInfo) + parseInt(sec_sum) <= result[0][q_arg2] &&
-                fstInfo >= 0 &&
-                secInfo >= 0
-            ) {
+
+            if (!(parseInt(fstInfo) + parseInt(fst_sum) <= result[0][q_arg1])){
+                textContent.push({ type: 'creditError', msg: `${q_arg1}`, num: `${fstInfo}`})
+                fstInfo = 0
+            }
+            if (!(parseInt(secInfo) + parseInt(sec_sum) <= result[0][q_arg2])){
+                textContent.push({ type: 'creditError', msg: `${q_arg2}`, num: `${secInfo}`})
+                secInfo = 0
+            }
+
+            if ( !(fstInfo == 0 && secInfo == 0) ) {
                 await db.promise().query(
                     `INSERT INTO orders (UserID ,num ,${db.escapeId(i_arg1)} ,${db.escapeId(i_arg2)}) VALUE (?,?,?,?)`,
                     [req.session.userID, name, fstInfo, secInfo]
@@ -172,17 +179,17 @@ router.post('/add', async (req, res) => {
 });
 
 // DELETE
-router.get('/delete/(:id)', (req,res) => {
+router.get('/delete/(:id)', ifNotLoggedIn, (req,res) => {
     const orderID = req.params.id;
     db.query('SELECT * FROM orders WHERE OrderID = ?',[orderID], (err,[result])=>{
         if (err) throw err
         if (result.UserID === req.session.userID) {
             db.query('DELETE FROM orders WHERE OrderID = ?', [result.OrderID], (er ,pass) => {
                 if (er) throw er
-                res.json({msg:"ลบรายการเสร็จสิ้น"})
+                res.json({type:"success" ,msg:"ลบรายการเสร็จสิ้น"})
             })
         } else {
-            res.json({msg:"บางอย่างผิดพลาด"})
+            res.json({type:"danger" ,msg:"บางอย่างผิดพลาด"})
         }
     })
 })
