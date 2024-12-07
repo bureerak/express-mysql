@@ -1,12 +1,24 @@
 // const db = require('./mySQL');
 const express = require('express');
 const path = require('path');
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
+
+const { Server } = require('socket.io');
+const http = require('http');
 
 const dotenv = require('dotenv');
+const { Socket } = require('dgram');
 dotenv.config( { path:'./.env' } )
 
 const app = express();
+const http_server = http.createServer(app);
+const io = new Server(http_server);
+
+// Socket.IO
+io.on('connection', (socket) => {
+    console.log("user connect")
+})
+
 const publicDirectory = path.join(__dirname,'./public');
 app.use(express.static(publicDirectory)); // set ตำแหน่งไฟล์ acces(css) ต่างๆ
 app.set('view engine', 'hbs'); // ใช้ hbs เป็น view engine
@@ -26,6 +38,6 @@ app.use(express.json());
 app.use('/', require('./routes/route'));
 app.use('/auth', require('./routes/auth'));
 
-app.listen(8000, () => {
+http_server.listen(8000, () => {
     console.log("Server start on port 8000")
 });

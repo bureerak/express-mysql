@@ -9,6 +9,10 @@
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <title>Home</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+    </script>
     <style>
         body {
             background-color: rgb(176, 191, 191);
@@ -118,7 +122,7 @@
                 ผลลัพธ์การดำเนินการ
             </div>
             <div class="card-body">
-                <h5 class="card-title">Special title treatment</h5>
+                <h5 class="card-title"> (เครดิตไม่เพียงพอ) ไม่เพียงพอ </h5>
                 <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
                 <button id="closeModal" class="btn btn-danger"><strong>ปิด</strong></button>
             </div>
@@ -297,7 +301,6 @@
                     input.value = ""
                 })
                 if (Object.keys(data).length > 0 && data.ID0) {
-                    console.log(data)
                     UseData.push(data)
                 }
             })
