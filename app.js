@@ -7,7 +7,6 @@ const { Server } = require('socket.io');
 const http = require('http');
 
 const dotenv = require('dotenv');
-const { Socket } = require('dgram');
 dotenv.config( { path:'./.env' } )
 
 const app = express();
@@ -16,7 +15,13 @@ const io = new Server(http_server);
 
 // Socket.IO
 io.on('connection', (socket) => {
-    console.log("user connect")
+    socket.on('alertJoin', (arg) => {
+        console.log(`${arg} Joined`)
+    })
+    socket.on('disconnect', (reason) =>{
+        console.log('User Disconnected')
+    })
+
 })
 
 const publicDirectory = path.join(__dirname,'./public');

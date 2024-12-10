@@ -4,6 +4,21 @@ const db = require('../mySQL');
 const { check, validationResult } = require('express-validator');
 const router = express.Router();
 
+function getPermutations(string) {
+    if (string.length <= 1) {
+        return [string];
+    }
+    const permutations = [];
+    for (let i = 0; i < string.length; i++) {
+        const char = string[i];
+        const remainingChars = string.slice(0, i) + string.slice(i + 1);
+        for (const perm of getPermutations(remainingChars)) {
+            permutations.push(char + perm);
+        }
+    }
+    return permutations;
+}
+
 const ifNotLoggedIn = (req, res, next) => {
     if (!req.session.isLoggedIn) {
         return res.render('index');
@@ -15,12 +30,14 @@ router.get("/", (req, res) => {
     res.redirect('/home')
 });
 
-router.get('/home', ifNotLoggedIn, (req, res) => {
+router.get('/home', ifNotLoggedIn, async (req, res) => {
+    const [maxData] = await db.promise().query('SELECT max_up, max_tod, max_down, run_up, run_down FROM users WHERE id = ?', [req.session.userID])
     db.promise().execute('SELECT users.username FROM users WHERE id = ?', [req.session.userID])
         .then(([row]) => {
             res.render('home', {
                 name: row[0].username,
-                message: req.session.msg
+                message: req.session.msg,
+                credit: maxData[0]
             })
             req.session.msg = null
         })
@@ -32,13 +49,12 @@ router.get('/logout', (req, res) => {
 })
 
 router.get('/data', ifNotLoggedIn, (req, res) => {
-    db.execute('SELECT max_up,max_tod,max_down,run_up,run_down FROM users WHERE id = ?', [req.session.userID], (err, result) => {
-        if (err) throw err;
-        db.execute('SELECT * FROM orders WHERE UserID = ? ORDER BY OrderID DESC', [req.session.userID], (error, results) => {
-            if (error) throw error;
-            res.send([result[0], results])
-        })
+
+    db.execute('SELECT * FROM orders WHERE UserID = ? ORDER BY OrderID DESC', [req.session.userID], (error, results) => {
+        if (error) throw error;
+        res.send(results)
     })
+
 })
 
 router.post('/reset', ifNotLoggedIn, [
@@ -122,21 +138,6 @@ router.post('/add', ifNotLoggedIn, async (req, res) => {
             let sum_2;
             if (i_arg2 === 'tod') {
 
-                function getPermutations(string) {
-                    if (string.length <= 1) {
-                        return [string];
-                    }
-                    const permutations = [];
-                    for (let i = 0; i < string.length; i++) {
-                        const char = string[i];
-                        const remainingChars = string.slice(0, i) + string.slice(i + 1);
-                        for (const perm of getPermutations(remainingChars)) {
-                            permutations.push(char + perm);
-                        }
-                    }
-                    return permutations;
-                }
-
                 const permutations = [...new Set(getPermutations(name))];
                 const todQuery = `SELECT SUM(${db.escapeId(i_arg2)}) AS sec_sum FROM orders WHERE num IN (${permutations.map(() => '?').join(', ')}) AND UserID = ?`;
                 [sum_2] = await db.promise().query(todQuery, [...permutations, req.session.userID]);
@@ -151,27 +152,27 @@ router.post('/add', ifNotLoggedIn, async (req, res) => {
             fst_sum = fst_sum ? fst_sum : 0
             sec_sum = sec_sum ? sec_sum : 0
 
-            if (!(parseInt(fstInfo) + parseInt(fst_sum) <= result[0][q_arg1])){
-                textContent.push({ type: 'creditError', msg: `${q_arg1}`, num: `${fstInfo}`})
+            if (!(parseInt(fstInfo) + parseInt(fst_sum) <= result[0][q_arg1])) {
+                textContent.push({ type: 'creditError', msg: `${q_arg1}`, num: `${name}`, credit: `${fstInfo}` })
                 fstInfo = 0
             }
-            if (!(parseInt(secInfo) + parseInt(sec_sum) <= result[0][q_arg2])){
-                textContent.push({ type: 'creditError', msg: `${q_arg2}`, num: `${secInfo}`})
+            if (!(parseInt(secInfo) + parseInt(sec_sum) <= result[0][q_arg2])) {
+                textContent.push({ type: 'creditError', msg: `${q_arg2}`, num: `${name}`, credit: `${secInfo}` })
                 secInfo = 0
             }
 
-            if ( !(fstInfo == 0 && secInfo == 0) ) {
+            if (!(fstInfo == 0 && secInfo == 0)) {
                 await db.promise().query(
                     `INSERT INTO orders (UserID ,num ,${db.escapeId(i_arg1)} ,${db.escapeId(i_arg2)}) VALUE (?,?,?,?)`,
                     [req.session.userID, name, fstInfo, secInfo]
                 );
-                textContent.push({ type: 'success', msg: `${name} ทำรายการเสร็จสิ้น` });
+                textContent.push({ type: 'success', num: `${name}`, bal1: `${fstInfo}`, bal2: `${secInfo}` });
             } else {
-                textContent.push({ type: 'danger', msg: `${name} มีข้อมูลไม่ถูกต้อง` });
+                textContent.push({ type: 'danger', msg: `มีข้อมูลไม่ถูกต้อง`, num: `${name}` });
             }
         } catch (err) {
             console.error(err);
-            textContent.push({ type: 'danger', msg: `${name} เกิดข้อผิดพลาด` });
+            textContent.push({ type: 'danger', msg: `เกิดข้อผิดพลาด`, num: `${name}` });
         }
     }
 
@@ -179,18 +180,42 @@ router.post('/add', ifNotLoggedIn, async (req, res) => {
 });
 
 // DELETE
-router.get('/delete/(:id)', ifNotLoggedIn, (req,res) => {
+router.get('/delete/(:id)', ifNotLoggedIn, (req, res) => {
     const orderID = req.params.id;
-    db.query('SELECT * FROM orders WHERE OrderID = ?',[orderID], (err,[result])=>{
+    db.query('SELECT * FROM orders WHERE OrderID = ?', [orderID], (err, [result]) => {
         if (err) throw err
         if (result.UserID === req.session.userID) {
-            db.query('DELETE FROM orders WHERE OrderID = ?', [result.OrderID], (er ,pass) => {
+            db.query('DELETE FROM orders WHERE OrderID = ?', [result.OrderID], (er, pass) => {
                 if (er) throw er
-                res.json({type:"success" ,msg:"ลบรายการเสร็จสิ้น"})
+                res.json({ type: "success", msg: "ลบรายการเสร็จสิ้น" })
             })
         } else {
-            res.json({type:"danger" ,msg:"บางอย่างผิดพลาด"})
+            res.json({ type: "danger", msg: "บางอย่างผิดพลาด" })
         }
     })
+})
+
+// Credit Check
+router.get('/creditCheck/(:value)', ifNotLoggedIn, async (req, res) => {
+    let sendBack = {}
+    const inputValue = req.params.value
+    const enableMapping = {
+        1: ["r_up", "r_down"],
+        2: ["top", "down"],
+        3: ["top", "tod"],
+    };
+    const select1 = enableMapping[inputValue.length][0]
+    const select2 = enableMapping[inputValue.length][1]
+    try {
+        const permutations = select2 == "tod" ? [...new Set(getPermutations(inputValue))] : [inputValue]
+        const queue1 = `SELECT SUM(${db.escapeId(select1)}) as ${select1} FROM orders WHERE UserID = ? AND num = ?`
+        const queue2 = `SELECT SUM(${db.escapeId(select2)}) as ${select2} FROM orders WHERE UserID = ? AND num IN (${permutations.map((data) => '?').join(', ')})`
+        const [result1] = await db.promise().query(queue1, [req.session.userID, inputValue])
+        const [result2] = await db.promise().query(queue2, [req.session.userID, ...permutations])
+        sendBack = { ...result1[0] , ...result2[0]} 
+    } catch (err) {
+        console.log(err)
+    }
+    res.send(sendBack)
 })
 module.exports = router; //export router ออกไปใช้

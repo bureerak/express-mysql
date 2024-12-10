@@ -11,7 +11,11 @@
     <title>Home</title>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io();
+        const socket = io(); //socket connecter
+        socket.on('connect', () => {
+            socket.emit("alertJoin", "{{name}}")
+            console.log('connectSocketSuccess')
+        })
     </script>
     <style>
         body {
@@ -55,26 +59,41 @@
             z-index: 999999;
             display: none;
         }
+
         .modalContainer.show {
             display: block;
             opacity: 1;
             animation-name: show;
             animation-duration: 0.3s;
         }
+
         .modalContainer .card {
+            overflow-x: auto;
             top: 50%;
             left: 50%;
-            transform: translate(-50%,-50%);
-            max-width: calc(100% - 4vh);
+            transform: translate(-50%, -50%);
+            max-width: calc(100% - 12vh);
             text-align: center;
         }
+
         @keyframes fadeOut {
-            0%{opacity: 1;}
-            100%{opacity: 0;}
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
         }
+
         @keyframes fadeIn {
-            0%{opacity: 0;}
-            100%{opacity: 1;}
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
     </style>
     <script>
@@ -89,17 +108,17 @@
             return 'Alert!'
         }
 
-        function showModal(){
+        function showModal() {
             const modal = document.getElementById("modalContainer");
             const clostBtn = document.getElementById("closeModal");
             modal.style.animationName = "fadeIn";
             modal.classList.add('show');
-            clostBtn.addEventListener('click', ()=>{
+            clostBtn.addEventListener('click', () => {
                 modal.style.animationName = "fadeOut"
                 setTimeout(() => {
-                modal.classList.remove('show');
+                    modal.classList.remove('show');
                 }, 250)
-            }, { once: true } );
+            }, { once: true });
         }
     </script>
 </head>
@@ -119,12 +138,28 @@
     <div id="modalContainer" class="modalContainer">
         <div class="card">
             <div class="card-header">
-                ผลลัพธ์การดำเนินการ
+                <h4> รายการที่สำเร็จ </h4>
             </div>
             <div class="card-body">
-                <h5 class="card-title"> (เครดิตไม่เพียงพอ) ไม่เพียงพอ </h5>
-                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                <button id="closeModal" class="btn btn-danger"><strong>ปิด</strong></button>
+                <div class="container" style="overflow-x: auto;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>หมายเลข</th>
+                                <th>ยอดลง(1)</th>
+                                <th>ยอดลง(2)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalSuccess">
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button id="closeModal" class="btn btn-danger"><strong>X</strong></button>
             </div>
         </div>
     </div>
@@ -165,27 +200,30 @@
                         <button type="submit" class="btn btn-success">ยืนยัน</button>
                     </form>
                 </div>
-                <div class="card-body" style="overflow-y: auto;">
+                <div class="card-body" style="overflow-x: auto;">
                     <table class="table table-hover">
                         <thead>
                             <tr>
+                                <th></th>
                                 <th>หมายเลข</th>
-                                <th>บน <p style="display: inline;" id="Crd">(Max)</p>
+                                <th>บน {{credit.max_up}}/<p style="display: inline; color:red;" class="Crd">0</p>
                                 </th>
-                                <th>โต๊ด <p style="display: inline;" id="Crd">(Max)</p>
+                                <th>โต๊ด {{credit.max_tod}}/<p style="display: inline; color:red;" class="Crd">0</p>
                                 </th>
-                                <th>ล่าง <p style="display: inline;" id="Crd">(Max)</p>
+                                <th>ล่าง {{credit.max_down}}/<p style="display: inline; color:red;" class="Crd">0</p>
                                 </th>
-                                <th>วิ่งบน <p style="display: inline;" id="Crd">(Max)</p>
+                                <th>วิ่งบน {{credit.run_up}}/<p style="display: inline; color:red;" class="Crd">0</p>
                                 </th>
-                                <th>วิ่งล่าง <p style="display: inline;" id="Crd">(Max)</p>
+                                <th>วิ่งล่าง {{credit.run_up}}/<p style="display: inline; color:red;" class="Crd">0</p>
                                 </th>
                             </tr>
                         </thead>
                         <tbody id="FormInput">
                             <tr>
-                                <th><input autocomplete="false" name="number" class="limitInput defInput" type="text"
-                                        maxlength="3"></th>
+                                <th><button class="btn btn-warning mx-2" onclick="creditCheck(1)"><ion-icon
+                                            name="sync-outline" style="color: white;"></ion-icon></button></th>
+                                <th><input id="userInput1" autocomplete="false" name="number"
+                                        class="limitInput defInput" type="text" maxlength="3"></th>
                                 <th><input min="0" name="up" type="number" class="limitInput cdInput-0" disabled>
                                 </th>
                                 <th><input min="0" name="tod" type="number" class="limitInput cdInput-0" disabled>
@@ -198,8 +236,10 @@
                                 </th>
                             </tr>
                             <tr>
-                                <th><input autocomplete="false" name="number" class="limitInput defInput" type="text"
-                                        maxlength="3"></th>
+                                <th><button class="btn btn-warning mx-2" onclick="creditCheck(2)"><ion-icon
+                                            name="sync-outline" style="color: white;"></ion-icon></button></th>
+                                <th><input id="userInput2" autocomplete="false" name="number"
+                                        class="limitInput defInput" type="text" maxlength="3"></th>
                                 <th><input min="0" name="up" type="number" class="limitInput cdInput-1" disabled>
                                 </th>
                                 <th><input min="0" name="tod" type="number" class="limitInput cdInput-1" disabled>
@@ -212,8 +252,10 @@
                                 </th>
                             </tr>
                             <tr>
-                                <th><input autocomplete="false" name="number" class="limitInput defInput" type="text"
-                                        maxlength="3"></th>
+                                <th><button class="btn btn-warning mx-2" onclick="creditCheck(3)"><ion-icon
+                                            name="sync-outline" style="color: white;"></ion-icon></button></th>
+                                <th><input id="userInput3" autocomplete="false" name="number"
+                                        class="limitInput defInput" type="text" maxlength="3"></th>
                                 <th><input min="0" name="up" type="number" class="limitInput cdInput-2" disabled>
                                 </th>
                                 <th><input min="0" name="tod" type="number" class="limitInput cdInput-2" disabled>
@@ -226,8 +268,10 @@
                                 </th>
                             </tr>
                             <tr>
-                                <th><input autocomplete="false" name="number" class="limitInput defInput" type="text"
-                                        maxlength="3"></th>
+                                <th><button class="btn btn-warning mx-2" onclick="creditCheck(4)"><ion-icon
+                                            name="sync-outline" style="color: white;"></ion-icon></button></th>
+                                <th><input id="userInput4" autocomplete="false" name="number"
+                                        class="limitInput defInput" type="text" maxlength="3"></th>
                                 <th><input min="0" name="up" type="number" class="limitInput cdInput-3" disabled>
                                 </th>
                                 <th><input min="0" name="tod" type="number" class="limitInput cdInput-3" disabled>
@@ -240,8 +284,10 @@
                                 </th>
                             </tr>
                             <tr>
-                                <th><input autocomplete="false" name="number" class="limitInput defInput" type="text"
-                                        maxlength="3"></th>
+                                <th><button class="btn btn-warning mx-2" onclick="creditCheck(5)"><ion-icon
+                                            name="sync-outline" style="color: white;"></ion-icon></button></th>
+                                <th><input id="userInput5" autocomplete="false" name="number"
+                                        class="limitInput defInput" type="text" maxlength="3"></th>
                                 <th><input min="0" name="up" type="number" class="limitInput cdInput-4" disabled>
                                 </th>
                                 <th><input min="0" name="tod" type="number" class="limitInput cdInput-4" disabled>
@@ -307,6 +353,7 @@
             data_add(UseData);
         })
 
+        const modalDetail = document.getElementById('modalSuccess')
         function data_add(formData) {
             const req = new XMLHttpRequest();
             req.open('POST', '/add');
@@ -314,11 +361,35 @@
             req.onload = () => {
                 const result = JSON.parse(req.responseText);
                 load_data();
-                console.log(result); // แสดงข้อมูลผลลัพธ์
+                // แสดงข้อมูลผลลัพธ์
+                modalDetail.innerHTML = ''
+                let counter = 0;
+                for (num of result) {
+                    if (num.type === "success") {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `<th>${num.num}</th><th>${num.bal1}</th><th>${num.bal2}</th>`;
+                        modalDetail.appendChild(row);
+                        ++counter;
+                    }
+                }
+                if (counter) { showModal(); }
             }
             req.send(JSON.stringify(formData))
         }
 
+        //send to Check credit
+        function creditCheck(num) {
+            const input = document.getElementById(`userInput${num}`)
+            if (input.value) {
+                fetch(`/creditCheck/${input.value}`)
+                    .then((res) => res.json())
+                    .then((data) => {
+                        console.log(data)
+                        update_HTML(data)
+                    })
+                    .catch((err) => console.log(err))
+            }
+        }
     </script>
 
 </body>
