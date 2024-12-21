@@ -10,13 +10,6 @@
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <title>Home</title>
     <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io(); //socket connecter
-        socket.on('connect', () => {
-            socket.emit("alertJoin", "{{name}}")
-            console.log('connectSocketSuccess')
-        })
-    </script>
     <style>
         body {
             background-color: rgb(176, 191, 191);
@@ -96,6 +89,41 @@
             }
         }
     </style>
+
+    <script>
+        let countDownDate = 0;
+
+        function counterDisplay() {
+
+            const now = new Date().getTime();
+            const distance = countDownDate - now;
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            if (distance < 0) {
+                clearInterval(x);
+                document.getElementById("demo").innerHTML = "ปิดทำการ";
+            } else {
+                document.getElementById("demo").innerHTML = days + "D " + hours + "H "
+                    + minutes + "M " + seconds + "S ";
+            }
+        }
+
+        const socket = io(); //socket connect
+        socket.on('connect', () => {
+            socket.emit("alertJoin", "{{name}}")
+        })
+
+        // Update Date
+        socket.on('dateUpdate',date => {
+            countDownDate = date;
+            counterDisplay();
+        })
+
+        const x = setInterval(counterDisplay, 1000);
+    </script>
+
     <script>
         /* Toast_Alert */
         function toastA(msg, type) {
@@ -165,7 +193,7 @@
     </div>
 
     <div class="container-fluid p-5 bg-primary text-white text-center">
-        <h1>Welcome to Homepage, {{name}}</h1>
+        <h1 id="demo">Loading . . .</h1>
         <p>กรุณาเปลี่ยนรหัสผ่านครั้งแรกทุกครั้ง</p>
     </div>
 
@@ -384,13 +412,13 @@
                 fetch(`/creditCheck/${input.value}`)
                     .then((res) => res.json())
                     .then((data) => {
-                        console.log(data)
                         update_HTML(data)
                     })
                     .catch((err) => console.log(err))
             }
         }
     </script>
+
 
 </body>
 

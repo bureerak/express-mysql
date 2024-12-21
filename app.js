@@ -15,17 +15,13 @@ const io = new Server(http_server);
 
 // Socket.IO
 io.on('connection', (socket) => {
-    socket.on('alertJoin', (arg) => {
-        console.log(`${arg} Joined`)
-    })
-    socket.on('disconnect', (reason) =>{
-        console.log('User Disconnected')
-    })
-
+    socket.on('alertJoin', res => console.log(`Client ${res} joined`))
 })
 
+module.exports = io; //export io to use other module
+
 const publicDirectory = path.join(__dirname,'./public');
-app.use(express.static(publicDirectory)); // set ตำแหน่งไฟล์ acces(css) ต่างๆ
+app.use(express.static(publicDirectory)); // set ตำแหน่งไฟล์ access(css) ต่างๆ
 app.set('view engine', 'hbs'); // ใช้ hbs เป็น view engine
 
 app.use(cookieSession({
@@ -42,6 +38,7 @@ app.use(express.json());
 //Define Route
 app.use('/', require('./routes/route'));
 app.use('/auth', require('./routes/auth'));
+app.use('/admin',require('./routes/admin'));
 
 http_server.listen(8000, () => {
     console.log("Server start on port 8000")
