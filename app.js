@@ -18,7 +18,7 @@ io.on('connection', (socket) => {
     socket.on('alertJoin', res => console.log(`Client ${res} joined`))
 })
 
-module.exports = io; //export io to use other module
+module.exports = io; //export io to use other module 
 
 const publicDirectory = path.join(__dirname,'./public');
 app.use(express.static(publicDirectory)); // set ตำแหน่งไฟล์ access(css) ต่างๆ
