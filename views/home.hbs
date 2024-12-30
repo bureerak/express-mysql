@@ -8,7 +8,7 @@
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-    <title>Home</title>
+    <title>HOME | NUMBER</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
         body {
@@ -90,8 +90,8 @@
         }
     </style>
 
-    <script>
-        let countDownDate = 0;
+    <script> // Timer
+        let countDownDate = {{ time }};
 
         function counterDisplay() {
 
@@ -116,9 +116,10 @@
         })
 
         // Update Date
-        socket.on('dateUpdate',date => {
+        socket.on('dateUpdate', date => {
             countDownDate = date;
             counterDisplay();
+            const x = setInterval(counterDisplay, 1000);
         })
 
         const x = setInterval(counterDisplay, 1000);
@@ -165,17 +166,17 @@
 
     <div id="modalContainer" class="modalContainer">
         <div class="card">
-            <div class="card-header">
-                <h4> รายการที่สำเร็จ </h4>
+            <div class="card-header mt-2">
+                <h4>ยอดที่ลงได้</h4>
             </div>
             <div class="card-body">
                 <div class="container" style="overflow-x: auto;">
-                    <table class="table">
+                    <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>หมายเลข</th>
-                                <th>ยอดลง(1)</th>
-                                <th>ยอดลง(2)</th>
+                                <th># หมายเลข</th>
+                                <th>ยอดลง | (1)</th>
+                                <th>ยอดลง | (2)</th>
                             </tr>
                         </thead>
                         <tbody id="modalSuccess">
@@ -187,13 +188,13 @@
                         </tbody>
                     </table>
                 </div>
-                <button id="closeModal" class="btn btn-danger"><strong>X</strong></button>
             </div>
+            <button id="closeModal" class="btn btn-danger"><strong>ปิด</strong></button>
         </div>
     </div>
 
     <div class="container-fluid p-5 bg-primary text-white text-center">
-        <h1 id="demo">Loading . . .</h1>
+        <h1 id="demo">รอสักครู่</h1>
         <p>กรุณาเปลี่ยนรหัสผ่านครั้งแรกทุกครั้ง</p>
     </div>
 

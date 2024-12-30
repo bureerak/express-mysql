@@ -31,13 +31,16 @@ router.get("/", (req, res) => {
 });
 
 router.get('/home', ifNotLoggedIn, async (req, res) => {
+    let [[countdownEndTime]] = await db.promise().execute('SELECT targetTime FROM time WHERE purpose = "main_event"');
+    countdownEndTime = countdownEndTime.targetTime.getTime()
     const [maxData] = await db.promise().query('SELECT max_up, max_tod, max_down, run_up, run_down FROM users WHERE id = ?', [req.session.userID])
     db.promise().execute('SELECT users.username FROM users WHERE id = ?', [req.session.userID])
         .then(([row]) => {
             res.render('home', {
                 name: row[0].username,
                 message: req.session.msg,
-                credit: maxData[0]
+                credit: maxData[0],
+                time: countdownEndTime
             })
             req.session.msg = null
         })
@@ -164,9 +167,9 @@ router.post('/add', ifNotLoggedIn, async (req, res) => {
             if (!(fstInfo == 0 && secInfo == 0)) {
                 await db.promise().query(
                     `INSERT INTO orders (UserID ,num ,${db.escapeId(i_arg1)} ,${db.escapeId(i_arg2)}) VALUE (?,?,?,?)`,
-                    [req.session.userID, name, fstInfo, secInfo]
+                    [req.session.userID, name, Math.abs(fstInfo), Math.abs(secInfo)]
                 );
-                textContent.push({ type: 'success', num: `${name}`, bal1: `${fstInfo}`, bal2: `${secInfo}` });
+                textContent.push({ type: 'success', num: `${name}`, bal1: `${Math.abs(fstInfo)}`, bal2: `${Math.abs(secInfo)}` });
             } else {
                 textContent.push({ type: 'danger', msg: `มีข้อมูลไม่ถูกต้อง`, num: `${name}` });
             }
